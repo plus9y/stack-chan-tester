@@ -16,10 +16,6 @@
 #include <M5Unified.h>                       // M5Unifiedライブラリ
 #include <Stackchan_system_config.h>         // stack-chanの初期設定ファイルを扱うライブラリ
 #include <Stackchan_servo.h>                 // stack-chanのサーボを動かすためのライブラリ
-#ifdef ARDUINO_M5STACK_CORES3
-#include <gob_unifiedButton.hpp>
-goblib::UnifiedButton unifiedButton;         // M5CoreS3のタッチパネルをボタンA,B,Cとして使うためのライブラリ。
-#endif
 #include <Avatar.h>                          // 顔を表示するためのライブラリ https://github.com/meganetaaan/m5stack-avatar
 #include "formatString.hpp"                  // 文字列に変数の値を組み込むために使うライブラリ https://gist.github.com/GOB52/e158b689273569357b04736b78f050d6
 // ヘッダファイルのinclude end 
@@ -65,9 +61,6 @@ void adjustOffset() {
   servo.moveXY(system_config.getServoInfo(AXIS_X)->start_degree, system_config.getServoInfo(AXIS_Y)->start_degree, 2000);  // サーボを中央にセット
   bool adjustX = true; // X軸とY軸のモードを切り替えるためのフラグ
   for (;;) { // 無限ループ(BtnBが長押しされるまで繰り返します。)
-#ifdef ARDUINO_M5STACK_CORES3
-    unifiedButton.update(); // M5.update() よりも前に呼ぶ事
-#endif
     M5.update();
     if (M5.BtnA.wasPressed()) {
       // オフセットを減らす
@@ -117,9 +110,6 @@ void moveRandom() {
     // ランダムモード
     int x = random(system_config.getServoInfo(AXIS_X)->lower_limit + 45, system_config.getServoInfo(AXIS_X)->upper_limit - 45);  // 可動範囲の下限+45〜上限-45 でランダム
     int y = random(system_config.getServoInfo(AXIS_Y)->lower_limit, system_config.getServoInfo(AXIS_Y)->upper_limit);            // 可動範囲の下限〜上限 でランダム
-#ifdef ARDUINO_M5STACK_CORES3
-    unifiedButton.update(); // M5.update() よりも前に呼ぶ事
-#endif
     M5.update();
     if (M5.BtnC.wasPressed()) {
       // ランダムモードを抜ける処理。(loop()に戻ります。)
@@ -177,10 +167,7 @@ void setup() {
   auto cfg = M5.config();       // 設定用の情報を抽出
   cfg.serial_baudrate = 115200;
   M5.begin(cfg);                // M5Stackをcfgの設定で初期化
-#ifdef ARDUINO_M5STACK_CORES3 // CORES3のときに有効になります。
-  // 画面上のタッチパネルを3分割してBtnA, B, Cとして使う設定。
-  unifiedButton.begin(&M5.Display, goblib::UnifiedButton::appearance_t::transparent_all);
-#endif
+  M5.setTouchButtonHeight(40); // タッチボタンの画面下部から40pxに設定
   M5.Log.setLogLevel(m5::log_target_display, ESP_LOG_NONE);    // M5Unifiedのログ初期化（画面には表示しない。)
   M5.Log.setLogLevel(m5::log_target_serial, ESP_LOG_INFO);     // M5Unifiedのログ初期化（シリアルモニターにESP_LOG_INFOのレベルのみ表示する)
   M5.Log.setEnableColor(m5::log_target_serial, false);         // M5Unifiedのログ初期化（ログをカラー化しない。）
@@ -229,9 +216,6 @@ void setup() {
 // 基本的にはずっと繰り返し実行されます。
 // stack-chan-testerの場合は、ボタンを押して、各モードの関数が実行されると一時停止します。
 void loop() {
-#ifdef ARDUINO_M5STACK_CORES3
-  unifiedButton.update(); // M5.update() よりも前に呼ぶ事
-#endif
   M5.update();  // M5Stackのボタン状態を更新します。
   if (M5.BtnA.pressedFor(2000)) {                // ボタンAを2秒長押しを検出したら。
     adjustOffset();                              // サーボのオフセットを調整するモードへ
