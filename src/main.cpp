@@ -87,7 +87,7 @@ void adjustOffset() {
       }
     }
     // オフセットを反映した位置にサーボを移動
-    servo.moveXY(system_config.getServoInfo(AXIS_X)->start_degree + servo_offset_x, system_config.getServoInfo(AXIS_Y)->start_degree + servo_offset_y, 1000);
+    servo.moveXY(system_config.getServoInfo(AXIS_X)->start_degree + servo_offset_x, system_config.getServoInfo(AXIS_Y)->start_degree + servo_offset_y, 10);
 
     std::string s;
 
